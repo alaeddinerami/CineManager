@@ -4,7 +4,7 @@ const dotenv = require('dotenv').config();
 const authRoute = require('./routers/userRoutes')
 const User = require('./models/User')
 const bcrypt = require('bcryptjs')
-
+const filmRoute = require('./routers/filmRoutes');
 
 
 connectDB();
@@ -16,7 +16,7 @@ app.get('/api/home',(req,res)=>{
     res.status(200).json({message: 'alalaa'})
 })
 
-async function initAdmine(){
+async function initAdmin(){
     try{
         const admin = await User.findOne({email:'admin@gmail.com'});
         if(!admin){
@@ -36,8 +36,12 @@ async function initAdmine(){
     
    }
 }
-initAdmine();
+initAdmin();
+
 app.use('/api',authRoute)
+app.use('/api',filmRoute)
+
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT,()=>{
     console.log(`server is running on ${PORT}`);

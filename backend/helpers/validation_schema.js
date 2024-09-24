@@ -12,6 +12,21 @@ const createAdminValidation = Joi.object({
 
 })
 
+const createFilmValidation = Joi.object({
+    title: Joi.string().required(),
+    genre: Joi.string().required(),
+    description: Joi.string().required(),
+    image: Joi.string().required(),
+});
+
+const updateFilmValidation = Joi.object({
+    title: Joi.string(),
+    genre: Joi.string(),
+    description: Joi.string(),
+    image: Joi.string(), 
+}).min(1); 
+
 module.exports = {
-    authSchema,createAdminValidation
+    authSchema,createAdminValidation,createFilmValidation,
+    updateFilmValidation
 }

@@ -1,4 +1,4 @@
-const User = require("../models/User"); // Adjust the path to your User model
+const User = require("../models/User"); 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { authSchema, createAdminValidation } = require("../helpers/validation_schema");
@@ -14,6 +14,9 @@ class UserController {
   async getAdminById(req,res){
     try {
       const adminId = req.params.id
+      // if(!adminId){
+      //   res.status(400).json({message:"invalide admin id"})
+      // }
       const admin = await User.findOne({_id: adminId, role:'admin'})
       if(!admin){
         return res.status(404).json({message:"admin not found"})
