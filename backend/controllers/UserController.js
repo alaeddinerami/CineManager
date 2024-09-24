@@ -1,29 +1,132 @@
 const User = require("../models/User"); // Adjust the path to your User model
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
+const { authSchema, createAdminValidation } = require("../helpers/validation_schema");
 class UserController {
+  async getAllAdmin(req,res){
+    try {
+      const admins = await User.find({role:'admin'});
+      res.status(200).json(admins)
+    } catch (error) {
+      res.status(500).json({message: error.message})
+    }
+  }
+  async getAdminById(req,res){
+    try {
+      const adminId = req.params.id
+      const admin = await User.findById(adminId)
+      res.status(200).json(admin);
+    } catch (error) {
+      res.status(500).json({message: error.message})
+    }
+    
+  }
+    async create(req,res){
+        try {
+          const {name, email, password, role} = req.body;
+          const reqValidation = await createAdminValidation.validateAsync(req.body);
+          console.log(reqValidation);
+          
+          const existingAdmin = await User.findOne({email})
+          if(existingAdmin){
+            return res.status(400).json({message:"admin already exists"});
+          }
+          const hashedPassword = await bcrypt.hash(password,8)
+          const admin = new User({
+            name,
+            email,
+            password: hashedPassword,
+            role: role || 'admin'
+          }) 
+          await admin.save();
+          res.status(200).json({message:"admin created successfully"})
+        } catch (error) {
+          if (error.isJoi === true) {
+            return res.status(422).json({ message: "Validation error", error: error.details[0].message });
+        }
+          res.status(500).json({message: error.message});
+        }
+  }
+  async update(req, res) {
+    try {
+        const adminId = req.params.id;
+        const { name, email, password } = req.body;
+
+        let admin = await User.findById(adminId);
+        if (!admin) {
+            return res.status(404).json({ message: "Admin not found" });
+        }
+
+        const updatedData = {
+            name: name || admin.name,
+            email: email || admin.email
+        };
+
+        if (password) {
+            updatedData.password = await bcrypt.hash(password, 8);
+        }
+
+        admin = await User.findByIdAndUpdate(adminId, updatedData, { new: true });
+
+        res.status(200).json({ message: "Admin updated successfully", admin });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+async delete(req, res) {
+  try {
+    const adminId = req.params.id; 
+
+    const admin = await User.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    await User.findByIdAndDelete(adminId);
+
+    res.status(200).json({ message: "Admin deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+}
+
+
   async register(req, res) {
     try {
-      const { name, email, password, role } = req.body;
+      const { name, email, password } = req.body;
+      const result = await authSchema.validateAsync(req.body);
+      console.log(result);
 
       const existingUser = await User.findOne({ email });
       if (existingUser) {
         return res.status(400).json({ message: "User already exists" });
       }
 
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, 8);
 
       const user = new User({
         name,
         email,
         password: hashedPassword,
-        role
+
       });
+      const token = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "1h",
+        }
+      );
 
       await user.save();
-      res.status(201).json({ message: "User registered successfully" });
+      res.status(201).json({token}, { message: "User registered successfully" });
     } catch (error) {
+      if (error.isJoi) {
+        return res
+          .status(422)
+          .json({ message: "Validation error", details: error.details });
+      }
       res.status(500).json({ message: "Server error", error });
     }
   }
@@ -42,17 +145,28 @@ class UserController {
         return res.status(400).json({ message: "Invalid credentials" });
       }
 
-      const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-        expiresIn: "1h" 
-      });
+      const token = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "1h",
+        }
+      );
 
-      res.status(200).json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role }, message: "User loged successfully" });
+      res.status(200).json({
+        token,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+        message: "User loged successfully", 
+      });
     } catch (error) {
       res.status(500).json({ message: "Server error", error });
     }
   }
-
- 
 }
 
 module.exports = new UserController();
