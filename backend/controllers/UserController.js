@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { authSchema, createAdminValidation } = require("../helpers/validation_schema");
 class UserController {
-  async getAllAdmin(req,res){
+  async getAllAdmin(req, res){
     try {
       const admins = await User.find({role:'admin'});
       res.status(200).json(admins)
@@ -14,7 +14,10 @@ class UserController {
   async getAdminById(req,res){
     try {
       const adminId = req.params.id
-      const admin = await User.findById(adminId)
+      const admin = await User.findOne({_id: adminId, role:'admin'})
+      if(!admin){
+        return res.status(404).json({message:"admin not found"})
+      }
       res.status(200).json(admin);
     } catch (error) {
       res.status(500).json({message: error.message})
@@ -120,7 +123,7 @@ async delete(req, res) {
       );
 
       await user.save();
-      res.status(201).json({token}, { message: "User registered successfully" });
+      res.status(201).json({token, user, message: "User registered successfully" });
     } catch (error) {
       if (error.isJoi) {
         return res
