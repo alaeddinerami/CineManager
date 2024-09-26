@@ -1,0 +1,13 @@
+###
+GET http://localhost:3000/api/seances HTTP/1.1
+
+###
+post http://localhost:3000/api/seances HTTP/1.1
+Content-Type: application/json
+
+{
+     "film": "66f34ce6de89cb9fe600ed93", 
+  "salle": "66f51f42cb6856e80b616952", 
+  "date": "2024-09-25",
+  "price": 50
+}

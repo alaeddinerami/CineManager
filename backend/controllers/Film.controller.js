@@ -1,4 +1,4 @@
-const Film = require("../models/Film"); // Adjust the path to your Film model
+const Film = require("../models/film"); // Adjust the path to your Film model
 const { createFilmValidation, updateFilmValidation } = require("../helpers/validation_schema");
 
 class FilmController {
@@ -26,7 +26,7 @@ class FilmController {
 
   async create(req, res) {
     try {
-      const { title, genre, description, image } = req.body;
+      const { title, genre, description, image, duration } = req.body;
       const reqValidation = await createFilmValidation.validateAsync(req.body);
       console.log(reqValidation);
 
@@ -40,6 +40,7 @@ class FilmController {
         genre,
         description,
         image,
+        duration,
       });
 
       await film.save();
@@ -55,7 +56,7 @@ class FilmController {
   async update(req, res) {
     try {
       const filmId = req.params.id;
-      const { title, genre, description, image } = req.body;
+      const { title, genre, description, image, duration } = req.body;
 
       let film = await Film.findById(filmId);
       if (!film) {
@@ -70,6 +71,7 @@ class FilmController {
         genre: genre || film.genre,
         description: description || film.description,
         image: image || film.image,
+        duration: duration ||film.duration,
       };
 
       film = await Film.findByIdAndUpdate(filmId, updatedData, { new: true });

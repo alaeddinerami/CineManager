@@ -17,6 +17,7 @@ const createFilmValidation = Joi.object({
     genre: Joi.string().required(),
     description: Joi.string().required(),
     image: Joi.string().required(),
+    duration: Joi.number().required(),
 });
 
 const updateFilmValidation = Joi.object({
@@ -24,6 +25,7 @@ const updateFilmValidation = Joi.object({
     genre: Joi.string(),
     description: Joi.string(),
     image: Joi.string(), 
+    duration: Joi.number().required(),
 }).min(1); 
 
 module.exports = {

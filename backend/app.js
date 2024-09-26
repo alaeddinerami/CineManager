@@ -5,7 +5,9 @@ const authRoute = require('./routers/userRoutes')
 const User = require('./models/User')
 const bcrypt = require('bcryptjs')
 const filmRoute = require('./routers/filmRoutes');
-
+const salleRoute = require('./routers/salleRoutes');
+const seanceRoute = require('./routers/seanceRoute')
+const auth = require('../backend/middlewares/auth')
 
 connectDB();
 const app = express();
@@ -38,8 +40,10 @@ async function initAdmin(){
 }
 initAdmin();
 
-app.use('/api',authRoute)
-app.use('/api',filmRoute)
+app.use('/api', authRoute);
+app.use('/api',auth, filmRoute);
+app.use('/api',auth, salleRoute);
+app.use('/api',auth, seanceRoute);
 
 
 const PORT = process.env.PORT || 5000;
