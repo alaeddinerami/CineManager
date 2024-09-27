@@ -7,16 +7,18 @@ const bcrypt = require('bcryptjs')
 const filmRoute = require('./routers/filmRoutes');
 const salleRoute = require('./routers/salleRoutes');
 const seanceRoute = require('./routers/seanceRoute')
-const auth = require('../backend/middlewares/auth')
-
+const reservationRoute = require('./routers/reservationRoutes')
+const clientMidd = require('./middlewares/client');
+const isAdmin = require("./middlewares/admin");
+const  auth  = require("./middlewares/auth");
 connectDB();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
 
-app.get('/api/home',(req,res)=>{
-    res.status(200).json({message: 'alalaa'})
-})
+// app.get('/api/home',(req,res)=>{
+//     res.status(200).json({message: 'alalaa'})
+// })
 
 async function initAdmin(){
     try{
@@ -38,12 +40,14 @@ async function initAdmin(){
     
    }
 }
-initAdmin();
+// initAdmin();
+
+app.use('/api/reservations',auth, reservationRoute);
 
 app.use('/api', authRoute);
-app.use('/api',auth, filmRoute);
-app.use('/api',auth, salleRoute);
-app.use('/api',auth, seanceRoute);
+app.use('/api',auth,isAdmin, filmRoute);
+app.use('/api',auth,isAdmin, salleRoute);
+app.use('/api',auth,isAdmin, seanceRoute);
 
 
 const PORT = process.env.PORT || 5000;

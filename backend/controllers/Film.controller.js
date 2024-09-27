@@ -5,7 +5,7 @@ class FilmController {
   async getAll(req, res) {
     try {
       const films = await Film.find();
-      res.status(200).json(films);
+     return res.status(200).json(films);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

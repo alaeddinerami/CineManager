@@ -1,4 +1,4 @@
-const Salle = require('../models/salle');
+const Salle = require('../models/salle.model');
 
 class SalleController {
 

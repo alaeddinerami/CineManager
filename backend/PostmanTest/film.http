@@ -12,7 +12,7 @@ Content-Type: application/json
 
 ### get all films
 GET http://localhost:3000/api/films HTTP/1.1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjU3ZWMxZjAzMGM3ZWNlMmY2YWNlNSIsInJvbGUiOiJjbGllbnQiLCJpYXQiOjE3MjczNjQ4MDEsImV4cCI6MTczNTE0MDgwMX0.0rIxzi0_0p5dxJWtJneoS7kZhb0PDaOu7_NTaKdap70
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjMxYjQzNDZiY2EzMzRiYmJmZTQzMSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcyNzQzMzkzNSwiZXhwIjoxNzM1MjA5OTM1fQ.1X-p5tJYrgY6Q5J9PBL1U2eb0fgR0RiZRwNy2Nte3lg 
 ### get film by id
 GET http://localhost:3000/api/films/66f34d7a022ec544c77a5792 HTTP/1.1
 

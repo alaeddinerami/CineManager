@@ -3,8 +3,8 @@ Content-Type: application/json
 
 {
     "name":"alaeddine",
-    "email": "alaeddineramia@gmail.com",
-    "password":"alaeeddine"
+    "email": "alaeddineramiaaa@gmail.com",
+    "password":"12345678"
 }
 ###login
 
@@ -12,17 +12,19 @@ POST http://localhost:3000/api/login  HTTP/1.1
 Content-Type: application/json
 
 {
-    "email": "alaeddine@gmail.com",
-    "password":"alaeddine"
+    "email": "alaeddineramiaaa@gmail.com",
+    "password":"12345678"
 }
 ### get all admine
 GET http://localhost:3000/api/admin/all HTTP/1.1
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjMxYjQzNDZiY2EzMzRiYmJmZTQzMSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcyNzQyODEwMSwiZXhwIjoxNzM1MjA0MTAxfQ.CacL-JquRAet2DO6Tx_nngeCgtK4IBGMpERdjqgx8Qg
 ### get one admin
 GET http://localhost:3000/api/admin/66f31a3c29dec51159598a7e HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjMxYjQzNDZiY2EzMzRiYmJmZTQzMSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcyNzQyODEwMSwiZXhwIjoxNzM1MjA0MTAxfQ.CacL-JquRAet2DO6Tx_nngeCgtK4IBGMpERdjqgx8Qg
 
 ### create admin
 POST http://localhost:3000/api/admin/create HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjMxYjQzNDZiY2EzMzRiYmJmZTQzMSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcyNzQyODEwMSwiZXhwIjoxNzM1MjA0MTAxfQ.CacL-JquRAet2DO6Tx_nngeCgtK4IBGMpERdjqgx8Qg
 Content-Type: application/json
 
 {

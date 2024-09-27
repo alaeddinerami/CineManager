@@ -22,8 +22,8 @@ const seanceSchema = new mongoose.Schema(
     },
   },
   {
-    timeseries: true,
+    timestamps: true,
   }
 );
-Seance = mongoose.model("Seance", seanceSchema);
+const Seance = mongoose.model("Seance", seanceSchema);
 module.exports = Seance;
