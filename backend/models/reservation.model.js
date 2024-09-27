@@ -11,11 +11,16 @@ const schemaRaservation = mongoose.Schema(
       type: Number,
       required: true,
     },
+    client: {
+      type: schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const Reservation = mongoose.model('reservation',schemaRaservation);
+const Reservation = mongoose.model("reservation", schemaRaservation);
 module.exports = Reservation;
