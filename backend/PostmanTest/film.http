@@ -1,9 +1,11 @@
 ### creat film
 POST http://localhost:3000/api/films HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjMxYjQzNDZiY2EzMzRiYmJmZTQzMSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcyNzQ2NjAzOCwiZXhwIjoxNzM1MjQyMDM4fQ.AOm6E1QDcAHF8o14hyxxpFyvjIGZWL76KYgPWd9G_6w
+
 Content-Type: application/json
 
 {
-  "title": "Incepxtion",
+  "title": "Incepxtssion",
   "genre": "Sci-Fi",
   "description": "A mind-bending thriller",
   "image": "inception.jpg",

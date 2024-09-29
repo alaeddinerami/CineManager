@@ -16,7 +16,6 @@ const createFilmValidation = Joi.object({
     title: Joi.string().required(),
     genre: Joi.string().required(),
     description: Joi.string().required(),
-    image: Joi.string().required(),
     duration: Joi.number().required(),
 });
 
@@ -24,7 +23,6 @@ const updateFilmValidation = Joi.object({
     title: Joi.string(),
     genre: Joi.string(),
     description: Joi.string(),
-    image: Joi.string(), 
     duration: Joi.number().required(),
 }).min(1); 
 

@@ -1,11 +1,14 @@
-const Film = require("../models/film"); // Adjust the path to your Film model
+const Film = require("../models/film");
 const { createFilmValidation, updateFilmValidation } = require("../helpers/validation_schema");
+const upload = require('../middlewares/upload'); 
+const path = require('path');
+const fs = require('fs');
 
 class FilmController {
   async getAll(req, res) {
     try {
       const films = await Film.find();
-     return res.status(200).json(films);
+      return res.status(200).json(films);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -25,65 +28,87 @@ class FilmController {
   }
 
   async create(req, res) {
-    try {
-      const { title, genre, description, image, duration } = req.body;
-      const reqValidation = await createFilmValidation.validateAsync(req.body);
-      console.log(reqValidation);
-
-      const existingFilm = await Film.findOne({ title });
-      if (existingFilm) {
-        return res.status(400).json({ message: "Film already exists" });
+    upload(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ message: err });
       }
 
-      const film = new Film({
-        title,
-        genre,
-        description,
-        image,
-        duration,
-      });
+      try {
+        const { title, genre, description, duration } = req.body;
+        const reqValidation = await createFilmValidation.validateAsync(req.body);
+        console.log(reqValidation);
 
-      await film.save();
-      res.status(201).json({ message: "Film created successfully", film });
-    } catch (error) {
-      if (error.isJoi) {
-        return res.status(422).json({ message: "Validation error", details: error.details[0].message });
+        const image = req.file ? req.file.filename : null;
+
+        const existingFilm = await Film.findOne({ title });
+        if (existingFilm) {
+          return res.status(400).json({ message: "Film already exists" });
+        }
+
+        const film = new Film({
+          title,
+          genre,
+          description,
+          duration,
+          image: image || "default_image.jpg", 
+        });
+
+        await film.save();
+        res.status(201).json({ message: "Film created successfully", film });
+      } catch (error) {
+        if (error.isJoi) {
+          return res.status(422).json({ message: "Validation error", details: error.details[0].message });
+        }
+        res.status(500).json({ message: error.message });
       }
-      res.status(500).json({ message: error.message });
-    }
+    });
   }
 
   async update(req, res) {
-    try {
-      const filmId = req.params.id;
-      const { title, genre, description, image, duration } = req.body;
-
-      let film = await Film.findById(filmId);
-      if (!film) {
-        return res.status(404).json({ message: "Film not found" });
+    upload(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ message: err });
       }
 
-      const reqValidation = await updateFilmValidation.validateAsync(req.body);
-      console.log(reqValidation);
+      try {
+        const filmId = req.params.id;
+        const { title, genre, description, duration } = req.body;
 
-      const updatedData = {
-        title: title || film.title,
-        genre: genre || film.genre,
-        description: description || film.description,
-        image: image || film.image,
-        duration: duration ||film.duration,
-      };
+        let film = await Film.findById(filmId);
+        if (!film) {
+          return res.status(404).json({ message: "Film not found" });
+        }
 
-      film = await Film.findByIdAndUpdate(filmId, updatedData, { new: true });
+        const reqValidation = await updateFilmValidation.validateAsync(req.body);
+        console.log(reqValidation);
 
-      res.status(200).json({ message: "Film updated successfully", film });
-    } catch (error) {
-      if (error.isJoi) {
-        return res.status(422).json({ message: "Validation error", details: error.details[0].message });
+        const updatedData = {
+          title: title || film.title,
+          genre: genre || film.genre,
+          description: description || film.description,
+          duration: duration || film.duration,
+          image: req.file ? req.file.filename : film.image, 
+        };
+
+        if (req.file && film.image !== 'default_image.jpg') {
+          fs.unlinkSync(path.join(__dirname, '../uploads/', film.image));
+        }
+
+        film = await Film.findByIdAndUpdate(filmId, updatedData, { new: true });
+
+        res.status(200).json({ message: "Film updated successfully", film });
+      } catch (error) {
+        if (error.isJoi) {
+          return res.status(422).json({ message: "Validation error", details: error.details[0].message });
+        }
+        res.status(500).json({ message: error.message });
       }
-      res.status(500).json({ message: error.message });
-    }
+    });
   }
+
+
+
+
 
   async delete(req, res) {
     try {
@@ -92,6 +117,10 @@ class FilmController {
       const film = await Film.findById(filmId);
       if (!film) {
         return res.status(404).json({ message: "Film not found" });
+      }
+
+      if (film.image !== 'default_image.jpg') {
+        fs.unlinkSync(path.join(__dirname, '../uploads/', film.image));
       }
 
       await Film.findByIdAndDelete(filmId);
