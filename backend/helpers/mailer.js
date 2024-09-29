@@ -17,7 +17,7 @@ exports.sendTiketMail = async (user, reservation, seance, salle, film) => {
       <p>Your reservation has been confirmed!</p>
       <ul>
         <li><strong>Movie:</strong> ${film.title}</li>
-        <li><strong>Session Date and Time:</strong> ${seance.dateTime}</li>
+        <li><strong>Session Date and Time:</strong> ${seance.date}</li>
         <li><strong>Room:</strong> ${salle.name}</li>
         <li><strong>Seats:</strong> ${reservation.seats}</li>
         <li><strong>Price:</strong> ${seance.price} MAD</li>

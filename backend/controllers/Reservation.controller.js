@@ -1,13 +1,17 @@
 const Seance = require("../models/seance.model");
 const Reservation = require("../models/reservation.model");
-// const Salle = require("../models/salle.model");
+const Salle = require("../models/salle.model");
 const mailer = require('../helpers/mailer')
 class ReservationController {
   async reservePlace(req, res) {
     try {
       const { seanceId, placeNumber } = req.body;
+
+      console.log(`Request body: seanceId=${seanceId}, placeNumber=${placeNumber}`);
+
   
       const seance = await Seance.findById(seanceId).populate("salle").populate('film');
+  console.log(seance);
   
       if (!seance) {
         return res.status(404).json({ message: "Seance not found" });
@@ -40,11 +44,11 @@ class ReservationController {
       await newReservation.save();
   
       await mailer.sendTiketMail(
-        req.user, // Pass the logged-in user info
-        { seats: placeNumber }, // Pass reserved seat number
-        { dateTime: seance.dateTime, price: seance.price }, // Pass seance details
-        seance.salle, // Pass salle details
-        seance.film // Pass film details
+        req.user, 
+        { seats: placeNumber }, 
+        { date: seance.date, price: seance.price }, 
+        seance.salle, 
+        seance.film 
       );
       return res.status(200).json({
         message: `Place number ${placeNumber} reserved successfully`,

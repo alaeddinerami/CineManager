@@ -43,12 +43,12 @@ async function initAdmin(){
 }
 // initAdmin();
 
-app.use('/api/reservations',auth, reservationRoute);
+app.use('/api/reservations',auth(['client']), reservationRoute);
 
 app.use('/api', authRoute);
-app.use('/api',auth,isAdmin, filmRoute);
-app.use('/api',auth,isAdmin, salleRoute);
-app.use('/api',auth,isAdmin, seanceRoute);
+app.use('/api/films',auth(['admin']), filmRoute);
+app.use('/api/salles',auth(['admin']),salleRoute);
+app.use('/api/seances',auth(['admin']), seanceRoute);
 
 
 const PORT = process.env.PORT || 5000;

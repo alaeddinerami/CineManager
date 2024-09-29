@@ -2,11 +2,11 @@ const express = require('express')
 const router = express.Router()
 const salleController = require('../controllers/Salle.controller')
 
-router.get('/salles', salleController.getAll);
-router.get('/salles/:id',salleController.getSalleById)
-router.post('/salles',salleController.create);
-router.put('/salles/:id', salleController.update);
-router.delete('/salles/:id', salleController.delete);
+router.get('/', salleController.getAll);
+router.get('/:id',salleController.getSalleById)
+router.post('/',salleController.create);
+router.put('/:id', salleController.update);
+router.delete('/:id', salleController.delete);
 
 
 module.exports = router;

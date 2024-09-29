@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 const FilmController = require("../controllers/Film.controller");
 
-router.post('/films', FilmController.create);
-router.get('/films', FilmController.getAll);
-router.get('/films/:id', FilmController.getFilmById);
-router.put('/films/:id', FilmController.update);
-router.delete('/films/:id', FilmController.delete);
+router.post('/', FilmController.create);
+router.get('/', FilmController.getAll);
+router.get('/:id', FilmController.getFilmById);
+router.put('/:id', FilmController.update);
+router.delete('/:id', FilmController.delete);
 
 module.exports = router;

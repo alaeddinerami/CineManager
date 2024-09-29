@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-module.exports = async function (req, res, next) {
+module.exports = function(roles = []){
+ return async function (req, res, next) {
   
   let token;
   if (req.headers.authorization ){
@@ -21,13 +22,13 @@ module.exports = async function (req, res, next) {
   }
     req.user = currentUser;
     // console.log(currentUser)
-    // const roles = req.body.roles; 
-    // if (roles && !roles.includes(currentUser.role)) {
-    //   return res.status(403).send({ message: "Forbidden" });
-    // }
+    if (roles.length && !roles.includes(currentUser.role)) {
+      return res.status(403).json({ message: "Access forbidden: You do not have the required role" });
+    }
     next(); 
   
   }catch(error){
       res.status(401).json({ message: "Token is not valid" });
   }
 };
+}

@@ -1,6 +1,6 @@
 ###
-POST http://localhost:3000/api/reserve HTTP/1.1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjY4MWEwY2E4MGI2YTU2YzIzZTlmZiIsInJvbGUiOiJjbGllbnQiLCJpYXQiOjE3Mjc0MzQwMTEsImV4cCI6MTczNTIxMDAxMX0.s7eZ_sF6umsYNESUhfuzeqR54NbysvO9TZWNM1OOMHw
+POST http://localhost:3000/api/reservations HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjcwNDAzNzU3M2EzNmYzZDEwNjY3NSIsInJvbGUiOiJjbGllbnQiLCJpYXQiOjE3Mjc2Mjc4ODEsImV4cCI6MTczNTQwMzg4MX0.QTWbfFhwolpQfRbD9BHWLRxCHQqkzW4IoBGlBU2kIfo
 
 Content-Type: application/json
 
