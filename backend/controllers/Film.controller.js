@@ -3,12 +3,23 @@ const { createFilmValidation, updateFilmValidation } = require("../helpers/valid
 const upload = require('../middlewares/upload'); 
 const path = require('path');
 const fs = require('fs');
+const Seance = require("../models/seance.model");
 
 class FilmController {
   async getAll(req, res) {
     try {
       const films = await Film.find();
-      return res.status(200).json(films);
+
+      // Construct the base URL for images
+      const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
+
+      // Map over films to include image URLs
+      const filmsWithImages = films.map(film => ({
+        ...film._doc,
+        image: `${baseUrl}${film.image}` // Construct the full URL
+      }));
+
+      return res.status(200).json(filmsWithImages);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -21,7 +32,38 @@ class FilmController {
       if (!film) {
         return res.status(404).json({ message: "Film not found" });
       }
+
+      // Construct the image URL
+      const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
+      film.image = `${baseUrl}${film.image}`; // Update the image URL
+
       res.status(200).json(film);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+
+  async getFilmByIdWithSeance(req, res) {
+    try {
+      const filmId = req.params.id;
+
+      // Fetch both film and its related seances
+      const film = await Film.findById(filmId);
+      if (!film) {
+        return res.status(404).json({ message: "Film not found" });
+      }
+
+      const seances = await Seance.find({ film: filmId });
+      if (!seances || seances.length === 0) {
+        return res.status(404).json({ message: "No seances found for this film" });
+      }
+
+      // Construct the image URL for the film
+      const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
+      film.image = `${baseUrl}${film.image}`;
+
+      // Respond with both film and its related seances
+      res.status(200).json({ film, seances });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

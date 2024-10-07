@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require('cors');
 const connectDB = require('./config/db')
 const dotenv = require('dotenv').config();
 const authRoute = require('./routers/userRoutes')
@@ -15,11 +16,17 @@ connectDB();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
+
 app.use('/uploads', express.static('uploads'));
 
 // app.get('/api/home',(req,res)=>{
 //     res.status(200).json({message: 'alalaa'})
 // })
+app.use(cors({
+    origin: 'http://localhost:5173', // Allow requests from this origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+    credentials: true // Allow credentials (if needed)
+}));
 
 async function initAdmin(){
     try{
@@ -46,9 +53,9 @@ async function initAdmin(){
 app.use('/api/reservations',auth(['client']), reservationRoute);
 
 app.use('/api', authRoute);
-app.use('/api/films',auth(['admin']), filmRoute);
-app.use('/api/salles',auth(['admin']),salleRoute);
-app.use('/api/seances',auth(['admin']), seanceRoute);
+app.use('/api/films', filmRoute);
+app.use('/api/salles',salleRoute);
+app.use('/api/seances', seanceRoute);
 
 
 const PORT = process.env.PORT || 5000;
