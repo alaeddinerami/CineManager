@@ -13,41 +13,17 @@ const filmSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    duration: {
+    duration:   {
         type: Number,
-        required: true,
+        required:true
     },
     image: {
         type: String,
         required: true,
     },
-    videoUrl: {
-        type: String,
-        required: true,
-    },
-    visibility: {
-        type: String,
-        enum: ["public", "private", "scheduled"], 
-        default: "public",
-    },
-    releaseDate: {
-        type: Date,
-        required: true,
-    },
-    ratings: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Rating', 
-    }],
-    comments: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Comment', 
-    }],
-    favorites: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Favorite', 
-    }],
-}, {
-    timestamps: true, 
+},
+{
+  timestamps: true,
 });
 
 module.exports = mongoose.model('Film', filmSchema);
