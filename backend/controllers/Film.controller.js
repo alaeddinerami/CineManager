@@ -1,25 +1,21 @@
-const Film = require("../models/film");
-const { createFilmValidation, updateFilmValidation } = require("../helpers/validation_schema");
+const filmService = require('../services/filmService');
+const { createFilmValidation, updateFilmValidation } = require('../helpers/validation_schema');
 const upload = require('../middlewares/upload'); 
 const path = require('path');
 const fs = require('fs');
-const Seance = require("../models/seance.model");
 
 class FilmController {
   async getAll(req, res) {
     try {
-      const films = await Film.find();
+      const films = await filmService.getAllFilms();
 
-      // Construct the base URL for images
       const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
-
-      // Map over films to include image URLs
       const filmsWithImages = films.map(film => ({
         ...film._doc,
-        image: `${baseUrl}${film.image}` // Construct the full URL
+        image: `${baseUrl}${film.image}`
       }));
 
-      return res.status(200).json(filmsWithImages);
+      res.status(200).json(filmsWithImages);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -28,14 +24,13 @@ class FilmController {
   async getFilmById(req, res) {
     try {
       const filmId = req.params.id;
-      const film = await Film.findById(filmId);
+      const film = await filmService.getFilmById(filmId);
       if (!film) {
         return res.status(404).json({ message: "Film not found" });
       }
 
-      // Construct the image URL
       const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
-      film.image = `${baseUrl}${film.image}`; // Update the image URL
+      film.image = `${baseUrl}${film.image}`;
 
       res.status(200).json(film);
     } catch (error) {
@@ -46,23 +41,11 @@ class FilmController {
   async getFilmByIdWithSeance(req, res) {
     try {
       const filmId = req.params.id;
+      const { film, seances } = await filmService.getFilmByIdWithSeances(filmId);
 
-      // Fetch both film and its related seances
-      const film = await Film.findById(filmId);
-      if (!film) {
-        return res.status(404).json({ message: "Film not found" });
-      }
-
-      const seances = await Seance.find({ film: filmId });
-      if (!seances || seances.length === 0) {
-        return res.status(404).json({ message: "No seances found for this film" });
-      }
-
-      // Construct the image URL for the film
       const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
       film.image = `${baseUrl}${film.image}`;
 
-      // Respond with both film and its related seances
       res.status(200).json({ film, seances });
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -77,25 +60,12 @@ class FilmController {
 
       try {
         const { title, genre, description, duration } = req.body;
-        const reqValidation = await createFilmValidation.validateAsync(req.body);
-        console.log(reqValidation);
+        await createFilmValidation.validateAsync(req.body);
 
-        const image = req.file ? req.file.filename : null;
+        const image = req.file ? req.file.filename : 'default_image.jpg';
+        const filmData = { title, genre, description, duration, image };
 
-        const existingFilm = await Film.findOne({ title });
-        if (existingFilm) {
-          return res.status(400).json({ message: "Film already exists" });
-        }
-
-        const film = new Film({
-          title,
-          genre,
-          description,
-          duration,
-          image: image || "default_image.jpg", 
-        });
-
-        await film.save();
+        const film = await filmService.createFilm(filmData);
         res.status(201).json({ message: "Film created successfully", film });
       } catch (error) {
         if (error.isJoi) {
@@ -116,29 +86,25 @@ class FilmController {
         const filmId = req.params.id;
         const { title, genre, description, duration } = req.body;
 
-        let film = await Film.findById(filmId);
-        if (!film) {
-          return res.status(404).json({ message: "Film not found" });
-        }
-
-        const reqValidation = await updateFilmValidation.validateAsync(req.body);
-        console.log(reqValidation);
+        await updateFilmValidation.validateAsync(req.body);
 
         const updatedData = {
-          title: title || film.title,
-          genre: genre || film.genre,
-          description: description || film.description,
-          duration: duration || film.duration,
-          image: req.file ? req.file.filename : film.image, 
+          title,
+          genre,
+          description,
+          duration,
+          image: req.file ? req.file.filename : undefined
         };
 
-        if (req.file && film.image !== 'default_image.jpg') {
-          fs.unlinkSync(path.join(__dirname, '../uploads/', film.image));
+        if (req.file) {
+          const film = await filmService.getFilmById(filmId);
+          if (film && film.image !== 'default_image.jpg') {
+            fs.unlinkSync(path.join(__dirname, '../uploads/', film.image));
+          }
         }
 
-        film = await Film.findByIdAndUpdate(filmId, updatedData, { new: true });
-
-        res.status(200).json({ message: "Film updated successfully", film });
+        const updatedFilm = await filmService.updateFilm(filmId, updatedData);
+        res.status(200).json({ message: "Film updated successfully", updatedFilm });
       } catch (error) {
         if (error.isJoi) {
           return res.status(422).json({ message: "Validation error", details: error.details[0].message });
@@ -148,24 +114,13 @@ class FilmController {
     });
   }
 
-
-
-
-
   async delete(req, res) {
     try {
       const filmId = req.params.id;
-
-      const film = await Film.findById(filmId);
-      if (!film) {
-        return res.status(404).json({ message: "Film not found" });
-      }
-
+      const film = await filmService.deleteFilm(filmId);
       if (film.image !== 'default_image.jpg') {
         fs.unlinkSync(path.join(__dirname, '../uploads/', film.image));
       }
-
-      await Film.findByIdAndDelete(filmId);
 
       res.status(200).json({ message: "Film deleted successfully" });
     } catch (error) {
