@@ -1,177 +1,68 @@
-const Film = require("../models/film");
-const { createFilmValidation, updateFilmValidation } = require("../helpers/validation_schema");
-const upload = require('../middlewares/upload'); 
-const path = require('path');
-const fs = require('fs');
-const Seance = require("../models/seance.model");
+const filmService = require('../services/filmService');
 
 class FilmController {
-  async getAll(req, res) {
-    try {
-      const films = await Film.find();
-
-      // Construct the base URL for images
-      const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
-
-      // Map over films to include image URLs
-      const filmsWithImages = films.map(film => ({
-        ...film._doc,
-        image: `${baseUrl}${film.image}` // Construct the full URL
-      }));
-
-      return res.status(200).json(filmsWithImages);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+    async createFilm(req, res) {
+        try {
+            const film = await filmService.createFilm(req.body);
+            res.status(201).json(film);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
     }
-  }
 
-  async getFilmById(req, res) {
-    try {
-      const filmId = req.params.id;
-      const film = await Film.findById(filmId);
-      if (!film) {
-        return res.status(404).json({ message: "Film not found" });
-      }
-
-      // Construct the image URL
-      const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
-      film.image = `${baseUrl}${film.image}`; // Update the image URL
-
-      res.status(200).json(film);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+    async getFilmById(req, res) {
+        try {
+            const film = await filmService.getFilmById(req.params.id);
+            if (!film) {
+                return res.status(404).json({ error: "Film not found" });
+            }
+            res.status(200).json(film);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
     }
-  }
 
-  async getFilmByIdWithSeance(req, res) {
-    try {
-      const filmId = req.params.id;
-
-      // Fetch both film and its related seances
-      const film = await Film.findById(filmId);
-      if (!film) {
-        return res.status(404).json({ message: "Film not found" });
-      }
-
-      const seances = await Seance.find({ film: filmId });
-      if (!seances || seances.length === 0) {
-        return res.status(404).json({ message: "No seances found for this film" });
-      }
-
-      // Construct the image URL for the film
-      const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
-      film.image = `${baseUrl}${film.image}`;
-
-      // Respond with both film and its related seances
-      res.status(200).json({ film, seances });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+    async getAllFilms(req, res) {
+        try {
+            const films = await filmService.getAllFilms(req.query);
+            res.status(200).json(films);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
     }
-  }
 
-  async create(req, res) {
-    upload(req, res, async (err) => {
-      if (err) {
-        return res.status(400).json({ message: err });
-      }
-
-      try {
-        const { title, genre, description, duration } = req.body;
-        const reqValidation = await createFilmValidation.validateAsync(req.body);
-        console.log(reqValidation);
-
-        const image = req.file ? req.file.filename : null;
-
-        const existingFilm = await Film.findOne({ title });
-        if (existingFilm) {
-          return res.status(400).json({ message: "Film already exists" });
+    async updateFilm(req, res) {
+        try {
+            const updatedFilm = await filmService.updateFilm(req.params.id, req.body);
+            if (!updatedFilm) {
+                return res.status(404).json({ error: "Film not found" });
+            }
+            res.status(200).json(updatedFilm);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
         }
-
-        const film = new Film({
-          title,
-          genre,
-          description,
-          duration,
-          image: image || "default_image.jpg", 
-        });
-
-        await film.save();
-        res.status(201).json({ message: "Film created successfully", film });
-      } catch (error) {
-        if (error.isJoi) {
-          return res.status(422).json({ message: "Validation error", details: error.details[0].message });
-        }
-        res.status(500).json({ message: error.message });
-      }
-    });
-  }
-
-  async update(req, res) {
-    upload(req, res, async (err) => {
-      if (err) {
-        return res.status(400).json({ message: err });
-      }
-
-      try {
-        const filmId = req.params.id;
-        const { title, genre, description, duration } = req.body;
-
-        let film = await Film.findById(filmId);
-        if (!film) {
-          return res.status(404).json({ message: "Film not found" });
-        }
-
-        const reqValidation = await updateFilmValidation.validateAsync(req.body);
-        console.log(reqValidation);
-
-        const updatedData = {
-          title: title || film.title,
-          genre: genre || film.genre,
-          description: description || film.description,
-          duration: duration || film.duration,
-          image: req.file ? req.file.filename : film.image, 
-        };
-
-        if (req.file && film.image !== 'default_image.jpg') {
-          fs.unlinkSync(path.join(__dirname, '../uploads/', film.image));
-        }
-
-        film = await Film.findByIdAndUpdate(filmId, updatedData, { new: true });
-
-        res.status(200).json({ message: "Film updated successfully", film });
-      } catch (error) {
-        if (error.isJoi) {
-          return res.status(422).json({ message: "Validation error", details: error.details[0].message });
-        }
-        res.status(500).json({ message: error.message });
-      }
-    });
-  }
-
-
-
-
-
-  async delete(req, res) {
-    try {
-      const filmId = req.params.id;
-
-      const film = await Film.findById(filmId);
-      if (!film) {
-        return res.status(404).json({ message: "Film not found" });
-      }
-
-      if (film.image !== 'default_image.jpg') {
-        fs.unlinkSync(path.join(__dirname, '../uploads/', film.image));
-      }
-
-      await Film.findByIdAndDelete(filmId);
-
-      res.status(200).json({ message: "Film deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
     }
-  }
+
+    async deleteFilm(req, res) {
+        try {
+            const deletedFilm = await filmService.deleteFilm(req.params.id);
+            if (!deletedFilm) {
+                return res.status(404).json({ error: "Film not found" });
+            }
+            res.status(200).json({ message: "Film deleted successfully" });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    async getRelatedFilms(req, res) {
+        try {
+            const relatedFilms = await filmService.getRelatedFilms(req.query.genre);
+            res.status(200).json(relatedFilms);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
 }
 
 module.exports = new FilmController();
